@@ -43,9 +43,9 @@ class RecintosZoo {
             const recintosViaveis = [];
 
             for (const recinto of recintosCompativeis) {
-                const espacoLivre = recinto.tamanhoTotal - recinto.animaisExistentes;
+                const espacoLivre = recinto.max - recinto.qtd;
                 //aqui ele recebe null
-                const formatoRecinto = `Recinto ${recinto.numero} (espaço livre: ${espacoLivre} total: ${recinto.tamanhoTotal})`;
+                const formatoRecinto = `Recinto ${recinto.num} (espaço livre: ${espacoLivre} total: ${recinto.max})`;
                 recintosViaveis.push(formatoRecinto);
             }
             return { recintosViaveis };
