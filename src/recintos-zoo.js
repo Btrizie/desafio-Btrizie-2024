@@ -55,7 +55,6 @@ class RecintosZoo {
             }
             return { recintosViaveis };
         }
-
         else {
             return { erro: "Não há recinto viável"};
         }
@@ -71,9 +70,20 @@ class RecintosZoo {
 
         const eExistente = this.animais[recinto.animais];
             
-        //2) Animais carnívoros devem habitar somente com a própria espécie
+        //3) Animais já presentes no recinto devem continuar confortáveis com a inclusão do(s) novo(s)
         if(eExistente){
-            if (especie.carnivoro && eExistente !== especie || eExistente.carnivoro && eExistente !== especie) {
+            //2) Animais carnívoros devem habitar somente com a própria espécie
+            if ((especie.carnivoro || eExistente.carnivoro) && eExistente !== especie) {
+                return false;
+            }
+
+            //4) Hipopótamo(s) só tolera(m) outras espécies estando num recinto com savana e rio
+            if ((especie.especie === "HIPOPOTAMO" || eExistente === "HIPOPOTAMO") && recinto.bioma !== "savana e rio" && eExistente !== especie) {
+                return false;
+            }
+
+            //5) Um macaco não se sente confortável sem outro animal no recinto, seja da mesma ou outra espécie
+            if (especie === "MACACO" && recinto.quantidade === 0 && qtdAnimal/especie.tam == 1) {
                 return false;
             }
         }
