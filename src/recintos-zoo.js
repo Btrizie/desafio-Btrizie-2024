@@ -1,7 +1,7 @@
 class RecintosZoo {
     constructor() {
-        //fazer um tipo de enum --> java para guardar os animais e recintos
-        //ENUM de recintos (Lista com os recintos e suas caract.)
+
+        //Lista com os recintos e suas caract.
         this.recintos = [
             { num: 1, bioma: "savana", max: 10, animais: ["MACACO"], quantidade: 3 },
             { num: 2, bioma: "floresta", max: 5, animais: [], quantidade: 0 },
@@ -10,7 +10,7 @@ class RecintosZoo {
             { num: 5, bioma: "savana", max: 9, animais: ["LEAO"], quantidade: 1 }
         ];
 
-        //ENUM de tipos de animais (Lista com os animais e suas caract.) --> adicionado uma detecção para animais carnivoros
+        //Lista com os animais e suas caract. --> adicionado uma detecção para animais carnivoros
         this.animais = {
             "LEAO": { tam: 3, biomas: ["savana"], carnivoro: true },
             "LEOPARDO": { tam: 2, biomas: ["savana"], carnivoro: true },
@@ -21,37 +21,37 @@ class RecintosZoo {
         };
     }
 
-    //método para retornar os recintos disponíveis
+    //Método para retornar os recintos disponíveis
     analisaRecintos(animal, qtd) {
-
-        //caso animal existir, especie armazenará as informacões do animal
         const especie = this.animais[animal];
-
-        //caso o animal não exista, há o tratamento de erros
         if (!especie) {
             return { erro: "Animal inválido" };
         }
-        //caso a quantidade seja inválida
         if (qtd <= 0){
             return { erro: "Quantidade inválida" };
         }
 
         const qtdAnimal = especie.tam * qtd;
 
-        //recebe do metodo verifica apenas os biomas compatíveis
-        const recintosCompativeis = this.recintos.filter(recinto => this.verifica(recinto, especie, qtdAnimal));
-
+        //Recebe do metodo verifica apenas os biomas compatíveis
+        const recintosCompativeis = this.recintos.filter(recinto => this.verificaRecintos(recinto, especie, qtdAnimal));
 
         if (recintosCompativeis.length > 0) {
-             // Criação da lista de recintos viáveis
             const recintosViaveis = [];
 
             for (const recinto of recintosCompativeis) {
+                //6) Quando há mais de uma espécie no mesmo recinto, é preciso considerar 1 espaço extra ocupado
+                for (const animaisR of recinto.animais) {
+                    if (animaisR !== animal) {
+                        recinto.quantidade++;
+                        if(recinto.animais.length == 1){ recinto.quantidade++; }
+                    }
+                }
+
                 recinto.quantidade += especie.tam * qtd;
                 const espacoLivre = recinto.max - recinto.quantidade;
-                //aqui ele recebe null
-                const formatoRecinto = `Recinto ${recinto.num} (espaço livre: ${espacoLivre} total: ${recinto.max})`;
-                recintosViaveis.push(formatoRecinto);
+                const recintosV = `Recinto ${recinto.num} (espaço livre: ${espacoLivre} total: ${recinto.max})`;
+                recintosViaveis.push(recintosV);
             }
             return { recintosViaveis };
         }
@@ -61,14 +61,24 @@ class RecintosZoo {
         }
     }
 
-    //método para verificar a compatibilidade de um recinto
-    verifica(recinto, especie, qtdAnimal) {
+    //Método para verificar a compatibilidade de um recinto
+    verificaRecintos(recinto, especie, qtdAnimal) {
         const espacoNecessario = qtdAnimal;
         const espacoDisponivel = recinto.max - recinto.quantidade;
 
-        //for (const biomaE of especie.biomas) --> if (recinto.bioma.includes(biomaE)) --> biomaCompatível = true;
+        //1) Um animal se sente confortável se está num bioma adequado e com espaço suficiente para cada indivíduo
         const biomaCompativel = especie.biomas.some(biomaEsp => recinto.bioma.includes(biomaEsp));
 
+        const eExistente = this.animais[recinto.animais];
+            
+        //2) Animais carnívoros devem habitar somente com a própria espécie
+        if(eExistente){
+            if (especie.carnivoro && eExistente !== especie || eExistente.carnivoro && eExistente !== especie) {
+                return false;
+            }
+        }
+
+        //7) Não é possível separar os lotes de animais nem trocar os animais que já existem de recinto
         return espacoDisponivel >= espacoNecessario && biomaCompativel;
     }
 
