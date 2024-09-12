@@ -1,6 +1,5 @@
 class RecintosZoo {
     constructor() {
-
         //Lista com os recintos e suas caract.
         this.recintos = [
             { num: 1, bioma: "savana", max: 10, animais: ["MACACO"], quantidade: 3 },
@@ -46,13 +45,6 @@ class RecintosZoo {
             const recintosViaveis = [];
 
             for (const recinto of recintosCompativeis) {
-                //6) Quando há mais de uma espécie no mesmo recinto, é preciso considerar 1 espaço extra ocupado
-                for (const animaisR of recinto.animais) {
-                    if (animaisR !== animal) {
-                        if(recinto.animais.length == 1){ recinto.quantidade++;}
-                        recinto.quantidade++;
-                    }
-                }
                 recinto.quantidade += especie.tam * qtd;
                 const espacoLivre = recinto.max - recinto.quantidade;
                 const recintosV = `Recinto ${recinto.num} (espaço livre: ${espacoLivre} total: ${recinto.max})`;
@@ -68,7 +60,6 @@ class RecintosZoo {
     //Método para verificar a compatibilidade de um recinto
     verificaRecintos(recinto, especie, qtdAnimal) {
         const espacoNecessario = qtdAnimal;
-        const espacoDisponivel = recinto.max - recinto.quantidade;
 
         //1) Um animal se sente confortável se está num bioma adequado e com espaço suficiente para cada indivíduo
         const biomaCompativel = especie.biomas.some(biomaEsp => recinto.bioma.includes(biomaEsp));
@@ -82,6 +73,14 @@ class RecintosZoo {
             
         //3) Animais já presentes no recinto devem continuar confortáveis com a inclusão do(s) novo(s)
         if(eExistente !== null){
+            recinto.quantidade = recinto.quantidade * eExistente.tam
+            //6) Quando há mais de uma espécie no mesmo recinto, é preciso considerar 1 espaço extra ocupado
+            for (const animaisR of recinto.animais) {
+                if (animaisR !== especie.nome) {
+                    recinto.quantidade++;
+                }
+            }
+            
             //2) Animais carnívoros devem habitar somente com a própria espécie
             if ((especie.carnivoro || eExistente.carnivoro) && eExistente.nome !== especie.nome) {
                 return false;
@@ -98,6 +97,8 @@ class RecintosZoo {
                 return false;
         }
 
+        const espacoDisponivel = recinto.max - recinto.quantidade;
+
         //7) Não é possível separar os lotes de animais nem trocar os animais que já existem de recinto
         return espacoDisponivel >= espacoNecessario && biomaCompativel;
     }
@@ -105,3 +106,33 @@ class RecintosZoo {
 }
 
 export { RecintosZoo as RecintosZoo };
+
+/*Testes extras para serem usados para teste, implementados em recintos-zoo.test.js
+
+test('Deve encontrar recinto para 1 hipopotamo', () => {
+    const resultado = new RecintosZoo().analisaRecintos('HIPOPOTAMO', 1);
+    expect(resultado.erro).toBeFalsy();
+    expect(resultado.recintosViaveis[0]).toBe('Recinto 3 (espaço livre: 0 total: 7)');
+    expect(resultado.recintosViaveis[1]).toBe('Recinto 4 (espaço livre: 4 total: 8)');
+    expect(resultado.recintosViaveis.length).toBe(2);
+});
+
+test('Deve encontrar recinto para 1 macaco', () => {
+    const resultado = new RecintosZoo().analisaRecintos('MACACO', 1);
+    expect(resultado.erro).toBeFalsy();
+    expect(resultado.recintosViaveis[0]).toBe('Recinto 1 (espaço livre: 6 total: 10)');
+    expect(resultado.recintosViaveis[1]).toBe('Recinto 3 (espaço livre: 3 total: 7)');
+    expect(resultado.recintosViaveis.length).toBe(2);
+});
+
+test('Não deve encontrar recintos para 3 leopardos', () => {
+    const resultado = new RecintosZoo().analisaRecintos('LEOPARDO', 3);
+    expect(resultado.erro).toBe('Não há recinto viável');
+});
+
+test('Deve impedir leão de ser colocado com outra espécie', () => {
+    const resultado = new RecintosZoo().analisaRecintos('LEAO', 1);
+    expect(resultado.erro).toBeFalsy();
+    expect(resultado.recintosViaveis[0]).toBe('Recinto 5 (espaço livre: 3 total: 9)');
+    expect(resultado.recintosViaveis.length).toBe(1); 
+});*/
