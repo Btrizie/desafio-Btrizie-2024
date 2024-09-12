@@ -39,15 +39,15 @@ class RecintosZoo {
         const qtdAnimal = especie.tam * qtd;
 
         //Recebe do metodo verifica apenas os biomas compatíveis
-        const recintosCompativeis = this.recintos.filter(recinto => this.verificaRecintos(recinto, especie, qtdAnimal));
+        const rCompativeis = this.recintos.filter(recinto => this.verificaRecintos(recinto, especie, qtdAnimal));
 
-        if (recintosCompativeis.length > 0) {
+        if (rCompativeis.length > 0) {
             const recintosViaveis = [];
 
-            for (const recinto of recintosCompativeis) {
-                recinto.quantidade += especie.tam * qtd;
-                const espacoLivre = recinto.max - recinto.quantidade;
-                const recintosV = `Recinto ${recinto.num} (espaço livre: ${espacoLivre} total: ${recinto.max})`;
+            for (const r of rCompativeis) {
+                r.quantidade += especie.tam * qtd;
+                const espacoLivre = r.max - r.quantidade;
+                const recintosV = `Recinto ${r.num} (espaço livre: ${espacoLivre} total: ${r.max})`;
                 recintosViaveis.push(recintosV);
             }
             return { recintosViaveis };
@@ -94,9 +94,8 @@ class RecintosZoo {
         }
         //5) Um macaco não se sente confortável sem outro animal no recinto, seja da mesma ou outra espécie
         else if(especie.nome === "MACACO" && recinto.quantidade === 0 && qtdAnimal == 1) {
-                return false;
+            return false;
         }
-
         const espacoDisponivel = recinto.max - recinto.quantidade;
 
         //7) Não é possível separar os lotes de animais nem trocar os animais que já existem de recinto
@@ -106,33 +105,3 @@ class RecintosZoo {
 }
 
 export { RecintosZoo as RecintosZoo };
-
-/*Testes extras para serem usados para teste, implementados em recintos-zoo.test.js
-
-test('Deve encontrar recinto para 1 hipopotamo', () => {
-    const resultado = new RecintosZoo().analisaRecintos('HIPOPOTAMO', 1);
-    expect(resultado.erro).toBeFalsy();
-    expect(resultado.recintosViaveis[0]).toBe('Recinto 3 (espaço livre: 0 total: 7)');
-    expect(resultado.recintosViaveis[1]).toBe('Recinto 4 (espaço livre: 4 total: 8)');
-    expect(resultado.recintosViaveis.length).toBe(2);
-});
-
-test('Deve encontrar recinto para 1 macaco', () => {
-    const resultado = new RecintosZoo().analisaRecintos('MACACO', 1);
-    expect(resultado.erro).toBeFalsy();
-    expect(resultado.recintosViaveis[0]).toBe('Recinto 1 (espaço livre: 6 total: 10)');
-    expect(resultado.recintosViaveis[1]).toBe('Recinto 3 (espaço livre: 3 total: 7)');
-    expect(resultado.recintosViaveis.length).toBe(2);
-});
-
-test('Não deve encontrar recintos para 3 leopardos', () => {
-    const resultado = new RecintosZoo().analisaRecintos('LEOPARDO', 3);
-    expect(resultado.erro).toBe('Não há recinto viável');
-});
-
-test('Deve impedir leão de ser colocado com outra espécie', () => {
-    const resultado = new RecintosZoo().analisaRecintos('LEAO', 1);
-    expect(resultado.erro).toBeFalsy();
-    expect(resultado.recintosViaveis[0]).toBe('Recinto 5 (espaço livre: 3 total: 9)');
-    expect(resultado.recintosViaveis.length).toBe(1); 
-});*/
