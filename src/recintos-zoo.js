@@ -11,20 +11,26 @@ class RecintosZoo {
         ];
 
         //Lista com os animais e suas caract. --> adicionado uma detecção para animais carnivoros
-        this.animais = {
-            "LEAO": { tam: 3, biomas: ["savana"], carnivoro: true },
-            "LEOPARDO": { tam: 2, biomas: ["savana"], carnivoro: true },
-            "CROCODILO": { tam: 3, biomas: ["rio"], carnivoro: true },
-            "MACACO": { tam: 1, biomas: ["savana", "floresta"], carnivoro: false },
-            "GAZELA": { tam: 2, biomas: ["savana"], carnivoro: false },
-            "HIPOPOTAMO": { tam: 4, biomas: ["savana", "rio"], carnivoro: false }
-        };
+        this.animais = [
+            { nome: "LEAO", tam: 3, biomas: ["savana"], carnivoro: true },
+            { nome: "LEOPARDO", tam: 2, biomas: ["savana"], carnivoro: true },
+            { nome: "CROCODILO", tam: 3, biomas: ["rio"], carnivoro: true },
+            { nome: "MACACO", tam: 1, biomas: ["savana", "floresta"], carnivoro: false },
+            { nome: "GAZELA", tam: 2, biomas: ["savana"], carnivoro: false },
+            { nome: "HIPOPOTAMO", tam: 4, biomas: ["savana", "rio"], carnivoro: false }
+        ];
     }
 
     //Método para retornar os recintos disponíveis
     analisaRecintos(animal, qtd) {
-        const especie = this.animais[animal];
-        if (!especie) {
+        let especie = null;
+        for (const e of this.animais) {
+            if(e.nome == animal){
+                especie = e;
+            }
+        }
+
+        if (especie == null) {
             return { erro: "Animal inválido" };
         }
         if (qtd <= 0){
@@ -43,11 +49,10 @@ class RecintosZoo {
                 //6) Quando há mais de uma espécie no mesmo recinto, é preciso considerar 1 espaço extra ocupado
                 for (const animaisR of recinto.animais) {
                     if (animaisR !== animal) {
+                        if(recinto.animais.length == 1){ recinto.quantidade++;}
                         recinto.quantidade++;
-                        if(recinto.animais.length == 1){ recinto.quantidade++; }
                     }
                 }
-
                 recinto.quantidade += especie.tam * qtd;
                 const espacoLivre = recinto.max - recinto.quantidade;
                 const recintosV = `Recinto ${recinto.num} (espaço livre: ${espacoLivre} total: ${recinto.max})`;
@@ -68,24 +73,29 @@ class RecintosZoo {
         //1) Um animal se sente confortável se está num bioma adequado e com espaço suficiente para cada indivíduo
         const biomaCompativel = especie.biomas.some(biomaEsp => recinto.bioma.includes(biomaEsp));
 
-        const eExistente = this.animais[recinto.animais];
+        let eExistente = null;
+        for (const e of this.animais) {
+            if(e.nome == recinto.animais){
+                eExistente = e;
+            }
+        }
             
         //3) Animais já presentes no recinto devem continuar confortáveis com a inclusão do(s) novo(s)
-        if(eExistente){
+        if(eExistente !== null){
             //2) Animais carnívoros devem habitar somente com a própria espécie
-            if ((especie.carnivoro || eExistente.carnivoro) && eExistente !== especie) {
+            if ((especie.carnivoro || eExistente.carnivoro) && eExistente.nome !== especie.nome) {
                 return false;
             }
 
             //4) Hipopótamo(s) só tolera(m) outras espécies estando num recinto com savana e rio
-            if ((especie.especie === "HIPOPOTAMO" || eExistente === "HIPOPOTAMO") && recinto.bioma !== "savana e rio" && eExistente !== especie) {
+            if ((especie.nome === "HIPOPOTAMO" || eExistente.nome === "HIPOPOTAMO") && recinto.bioma !== "savana e rio" && eExistente.nome !== especie.nome) {
                 return false;
             }
 
-            //5) Um macaco não se sente confortável sem outro animal no recinto, seja da mesma ou outra espécie
-            if (especie === "MACACO" && recinto.quantidade === 0 && qtdAnimal/especie.tam == 1) {
+        }
+        //5) Um macaco não se sente confortável sem outro animal no recinto, seja da mesma ou outra espécie
+        else if(especie.nome === "MACACO" && recinto.quantidade === 0 && qtdAnimal == 1) {
                 return false;
-            }
         }
 
         //7) Não é possível separar os lotes de animais nem trocar os animais que já existem de recinto
